@@ -1,3 +1,5 @@
+package main.example;
+
 import java.awt.Container;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -90,7 +92,7 @@ public class ChatClient extends JFrame implements ActionListener {
 
 		if( e.getSource() == chatField ) {
 			if( cc != null ) {
-				cc.send( chatField.getText() );
+				cc.send( chatField.getText() ); ///发送文字。。 from now on
 				chatField.setText( "" );
 				chatField.requestFocus();
 			}
@@ -98,11 +100,11 @@ public class ChatClient extends JFrame implements ActionListener {
 		} else if( e.getSource() == connect ) {
 			try {
 				// cc = new ChatClient(new URI(uriField.getText()), area, ( Draft ) draft.getSelectedItem() );
-				cc = new WebSocketClient( new URI( uriField.getText() ), (Draft) draft.getSelectedItem() ) {
+				cc = new WebSocketClient( new URI( uriField.getText() ), (Draft) draft.getSelectedItem(),"zhanglin~2" ) {
 
 					@Override
 					public void onMessage( String message ) {
-						ta.append( "got: " + message + "\n" );
+						ta.append(  message + "\n" );
 						ta.setCaretPosition( ta.getDocument().getLength() );
 					}
 
@@ -132,6 +134,7 @@ public class ChatClient extends JFrame implements ActionListener {
 						draft.setEditable( true );
 						close.setEnabled( false );
 					}
+
 				};
 
 				close.setEnabled( true );

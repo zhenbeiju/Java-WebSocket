@@ -1,4 +1,4 @@
-package main.example;
+package test;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -61,7 +61,7 @@ public class SSLClientExample {
     public static void main(String[] args) throws Exception {
         WebSocketImpl.DEBUG = true;
 
-        WebSocketChatClient chatclient = new WebSocketChatClient(new URI("wss://localhost:8887"), "mName");
+        WebSocketChatClient chatclient = new WebSocketChatClient(new URI("wss://localhost:8887"), "");
 
         // load up the key store
         String STORETYPE = "JKS";
