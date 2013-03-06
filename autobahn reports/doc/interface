@@ -1,0 +1,25 @@
+1. 消息传递必须以房间号开始。 roomid::message
+
+3. 系统消息追加 S::message  为系统消息标实
+			 SR::message  为系统消息并且可见
+
+4. 应用中使用的API 以A开头 A::methodname::json 数据
+
+APIS 
+    加入某个房间，
+    
+    EnterIn$!RoomName
+    
+    退出某个房间
+    
+    QuitIn$!RoomName
+    
+    获取房间内人名.
+    getUserList$!RoomName
+    
+    设置自己的姓名
+    setUname$!Uname
+    
+    设置客户端ID
+    setClintID$!ClintID
+    
