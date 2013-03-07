@@ -39,14 +39,7 @@ public class ChatServer extends WebSocketServer {
 
     @Override
     public boolean onMessage(WebSocket conn, String message) {
-        if (super.onMessage(conn, message)) {
-            String roomandMessage []= message.split("::");
-            if(roomandMessage.length==2){
-                this.sendToAll(conn.Uname.concat(":").concat(roomandMessage[1]));  
-            }
-   
-            System.out.println(conn + ": " + message);
-        }
+        this.sendToAll(message);
         return false;
     }
 

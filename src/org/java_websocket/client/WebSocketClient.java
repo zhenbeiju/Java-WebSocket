@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
+import net.sf.json.util.JSONStringer;
+
 import org.java_websocket.SocketChannelIOHelper;
 import org.java_websocket.WebSocket;
 import org.java_websocket.WebSocket.READYSTATE;
@@ -30,6 +32,7 @@ import org.java_websocket.framing.CloseFrame;
 import org.java_websocket.handshake.HandshakeImpl1Client;
 import org.java_websocket.handshake.Handshakedata;
 import org.java_websocket.handshake.ServerHandshake;
+import org.java_websocket.util.MethodName;
 
 /**
  * The <tt>WebSocketClient</tt> is an abstract class that expects a valid
@@ -125,7 +128,7 @@ public abstract class WebSocketClient extends WebSocketAdapter implements Runnab
     public WebSocketClient(URI serverUri, Draft draft, Map<String, String> headers, int connecttimeout, String Uname) {
         this(serverUri, draft, headers, connecttimeout);
         this.Uname = Uname;
-        
+
     }
 
     /**
@@ -185,6 +188,76 @@ public abstract class WebSocketClient extends WebSocketAdapter implements Runnab
     public void send(String text) throws NotYetConnectedException {
         if (conn != null) {
             conn.send(text);
+        }
+    }
+
+    public void joinRoom(String RoomName) {
+        if (conn != null) {
+            JSONStringer stringer = new JSONStringer();
+            String str = stringer.object().key(MethodName.METHODNAME).value(MethodName.ENTERIN_ID)
+                    .key(MethodName.ENTERIN).value(RoomName).endObject().toString();
+            conn.send(str);
+        }
+
+    }
+
+    public void quitRoom(String RoomName) {
+        if (conn != null) {
+            JSONStringer stringer = new JSONStringer();
+            String str = stringer.object().key(MethodName.METHODNAME).value(MethodName.QUITOUT_ID)
+                    .key(MethodName.QUITOUT).value(RoomName).endObject().toString();
+            conn.send(str);
+        }
+
+    }
+
+    public void getUserList(String RoomName) {
+        if (conn != null) {
+            JSONStringer stringer = new JSONStringer();
+            String str = stringer.object().key(MethodName.METHODNAME).value(MethodName.GETUSERLIST_ID)
+                    .key(MethodName.GETUSERLIST).value(RoomName).endObject().toString();
+            conn.send(str);
+        }
+
+    }
+
+    public void setUserName(String NickName) {
+        if (conn != null) {
+            JSONStringer stringer = new JSONStringer();
+            String str = stringer.object().key(MethodName.METHODNAME).value(MethodName.SETUSERNICKNAME_ID)
+                    .key(MethodName.SETUSERNICKNAME).value(NickName).endObject().toString();
+            conn.send(str);
+        }
+
+    }
+
+    public void setClintID(String clintId) {
+        if (conn != null) {
+            JSONStringer stringer = new JSONStringer();
+            String str = stringer.object().key(MethodName.METHODNAME).value(MethodName.SETUSERCLINTID_ID)
+                    .key(MethodName.SETUSERCLINTID).value(clintId).endObject().toString();
+            conn.send(str);
+        }
+
+    }
+
+    public void sendMessage(String Room, String msg) {
+        if (conn != null) {
+            JSONStringer stringer = new JSONStringer();
+            String str = stringer.object().key(MethodName.METHODNAME).value(MethodName.NORMAL_MESSAGE_ID)
+                    .key(MethodName.NORMAL_MESSAGE).value(msg).key(MethodName.MESSAGE_ROOM).value(Room).endObject()
+                    .toString();
+            conn.send(str);
+        }
+
+    }
+
+    public void sendMessage(String msg) {
+        if (conn != null) {
+            JSONStringer stringer = new JSONStringer();
+            String str = stringer.object().key(MethodName.METHODNAME).value(MethodName.NORMAL_MESSAGE_ID)
+                    .key(MethodName.NORMAL_MESSAGE).value(msg).endObject().toString();
+            conn.send(str);
         }
     }
 

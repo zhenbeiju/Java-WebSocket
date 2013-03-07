@@ -28,6 +28,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.LogManager;
 
+import net.sf.json.JSONObject;
+
 import org.java_websocket.SocketChannelIOHelper;
 import org.java_websocket.WebSocket;
 import org.java_websocket.WebSocketAdapter;
@@ -38,6 +40,7 @@ import org.java_websocket.drafts.Draft;
 import org.java_websocket.framing.CloseFrame;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.handshake.Handshakedata;
+import org.java_websocket.util.MethodName;
 
 /**
  * <tt>WebSocketServer</tt> is an abstract class that only takes care of the
@@ -491,7 +494,29 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
 
     @Override
     public final void onWebsocketMessage(WebSocket conn, String message) {
-        onMessage(conn, message);
+        JSONObject jsonObject = JSONObject.fromObject(message);
+        int methodID = jsonObject.getInt(MethodName.METHODNAME);
+        if (methodID > 0) {
+            switch (methodID) {
+            case MethodName.ENTERIN_ID:
+                break;
+            case MethodName.QUITOUT_ID:
+                break;
+            case MethodName.GETUSERLIST_ID:
+                break;
+            case MethodName.SETUSERCLINTID_ID:
+                break;
+            case MethodName.SETUSERNICKNAME_ID:
+                break;
+            case MethodName.NORMAL_MESSAGE_ID:
+                break;
+            default:
+                break;
+            }
+
+            onMessage(conn, message);
+        }
+
     }
 
     @Override
@@ -701,25 +726,6 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
      * @see #onMessage(WebSocket, ByteBuffer)
      **/
     public boolean onMessage(WebSocket conn, String message) {
-        if (message.contains("$!")) {
-            String voidandParam[] = message.split("$!");
-            if (voidandParam.length == 2) {
-                if (voidandParam[0].equals("EnterIn")) {
-                    enterIntoROOM(conn, voidandParam[1]);
-                } else if (voidandParam[0].equals("QuitIn")) {
-                    quitRoom(conn, voidandParam[1]);
-                } else if (voidandParam[0].equals("getUserList")) {
-                    getUserList(conn, voidandParam[1]);
-                } else if (voidandParam[0].equals("setUname")) {
-                    conn.Uname = voidandParam[1];
-                } else if (voidandParam[0].equals("setClintID")) {
-                    conn.ClinteID = voidandParam[1];
-                }
-
-            }
-
-            return false;
-        }
 
         return true;
     }
