@@ -32,7 +32,7 @@ import org.java_websocket.framing.CloseFrame;
 import org.java_websocket.handshake.HandshakeImpl1Client;
 import org.java_websocket.handshake.Handshakedata;
 import org.java_websocket.handshake.ServerHandshake;
-import org.java_websocket.util.MethodName;
+import org.java_websocket.util.KeyList;
 
 /**
  * The <tt>WebSocketClient</tt> is an abstract class that expects a valid
@@ -194,8 +194,8 @@ public abstract class WebSocketClient extends WebSocketAdapter implements Runnab
     public void joinRoom(String RoomName) {
         if (conn != null) {
             JSONStringer stringer = new JSONStringer();
-            String str = stringer.object().key(MethodName.METHODNAME).value(MethodName.ENTERIN_ID)
-                    .key(MethodName.ENTERIN).value(RoomName).endObject().toString();
+            String str = stringer.object().key(KeyList.METHODNAME).value(KeyList.ENTERIN_ID)
+                    .key(KeyList.ENTERIN).value(RoomName).endObject().toString();
             conn.send(str);
         }
 
@@ -204,8 +204,8 @@ public abstract class WebSocketClient extends WebSocketAdapter implements Runnab
     public void quitRoom(String RoomName) {
         if (conn != null) {
             JSONStringer stringer = new JSONStringer();
-            String str = stringer.object().key(MethodName.METHODNAME).value(MethodName.QUITOUT_ID)
-                    .key(MethodName.QUITOUT).value(RoomName).endObject().toString();
+            String str = stringer.object().key(KeyList.METHODNAME).value(KeyList.QUITOUT_ID)
+                    .key(KeyList.QUITOUT).value(RoomName).endObject().toString();
             conn.send(str);
         }
 
@@ -214,8 +214,8 @@ public abstract class WebSocketClient extends WebSocketAdapter implements Runnab
     public void getUserList(String RoomName) {
         if (conn != null) {
             JSONStringer stringer = new JSONStringer();
-            String str = stringer.object().key(MethodName.METHODNAME).value(MethodName.GETUSERLIST_ID)
-                    .key(MethodName.GETUSERLIST).value(RoomName).endObject().toString();
+            String str = stringer.object().key(KeyList.METHODNAME).value(KeyList.GETUSERLIST_ID)
+                    .key(KeyList.GETUSERLIST).value(RoomName).endObject().toString();
             conn.send(str);
         }
 
@@ -224,8 +224,8 @@ public abstract class WebSocketClient extends WebSocketAdapter implements Runnab
     public void setUserName(String NickName) {
         if (conn != null) {
             JSONStringer stringer = new JSONStringer();
-            String str = stringer.object().key(MethodName.METHODNAME).value(MethodName.SETUSERNICKNAME_ID)
-                    .key(MethodName.SETUSERNICKNAME).value(NickName).endObject().toString();
+            String str = stringer.object().key(KeyList.METHODNAME).value(KeyList.SETUSERNICKNAME_ID)
+                    .key(KeyList.SETUSERNICKNAME).value(NickName).endObject().toString();
             conn.send(str);
         }
 
@@ -234,8 +234,8 @@ public abstract class WebSocketClient extends WebSocketAdapter implements Runnab
     public void setClintID(String clintId) {
         if (conn != null) {
             JSONStringer stringer = new JSONStringer();
-            String str = stringer.object().key(MethodName.METHODNAME).value(MethodName.SETUSERCLINTID_ID)
-                    .key(MethodName.SETUSERCLINTID).value(clintId).endObject().toString();
+            String str = stringer.object().key(KeyList.METHODNAME).value(KeyList.SETUSERCLINTID_ID)
+                    .key(KeyList.SETUSERCLINTID).value(clintId).endObject().toString();
             conn.send(str);
         }
 
@@ -244,8 +244,8 @@ public abstract class WebSocketClient extends WebSocketAdapter implements Runnab
     public void sendMessage(String Room, String msg) {
         if (conn != null) {
             JSONStringer stringer = new JSONStringer();
-            String str = stringer.object().key(MethodName.METHODNAME).value(MethodName.NORMAL_MESSAGE_ID)
-                    .key(MethodName.NORMAL_MESSAGE).value(msg).key(MethodName.MESSAGE_ROOM).value(Room).endObject()
+            String str = stringer.object().key(KeyList.METHODNAME).value(KeyList.NORMAL_MESSAGE_ID)
+                    .key(KeyList.NORMAL_MESSAGE).value(msg).key(KeyList.MESSAGE_ROOM).value(Room).endObject()
                     .toString();
             conn.send(str);
         }
@@ -255,8 +255,8 @@ public abstract class WebSocketClient extends WebSocketAdapter implements Runnab
     public void sendMessage(String msg) {
         if (conn != null) {
             JSONStringer stringer = new JSONStringer();
-            String str = stringer.object().key(MethodName.METHODNAME).value(MethodName.NORMAL_MESSAGE_ID)
-                    .key(MethodName.NORMAL_MESSAGE).value(msg).endObject().toString();
+            String str = stringer.object().key(KeyList.METHODNAME).value(KeyList.NORMAL_MESSAGE_ID)
+                    .key(KeyList.NORMAL_MESSAGE).value(msg).endObject().toString();
             conn.send(str);
         }
     }

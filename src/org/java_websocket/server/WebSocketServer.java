@@ -40,7 +40,7 @@ import org.java_websocket.drafts.Draft;
 import org.java_websocket.framing.CloseFrame;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.handshake.Handshakedata;
-import org.java_websocket.util.MethodName;
+import org.java_websocket.util.KeyList;
 
 /**
  * <tt>WebSocketServer</tt> is an abstract class that only takes care of the
@@ -495,20 +495,34 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
     @Override
     public final void onWebsocketMessage(WebSocket conn, String message) {
         JSONObject jsonObject = JSONObject.fromObject(message);
-        int methodID = jsonObject.getInt(MethodName.METHODNAME);
+        int methodID = jsonObject.getInt(KeyList.METHODNAME);
         if (methodID > 0) {
+            String room;
             switch (methodID) {
-            case MethodName.ENTERIN_ID:
+
+            case KeyList.ENTERIN_ID:
+                room = jsonObject.getString(KeyList.ENTERIN);
+                enterIntoROOM(conn, room);
                 break;
-            case MethodName.QUITOUT_ID:
+            case KeyList.QUITOUT_ID:
+                room = jsonObject.getString(KeyList.QUITOUT);
+                quitRoom(conn, room);
                 break;
-            case MethodName.GETUSERLIST_ID:
+            case KeyList.GETUSERLIST_ID:
+                room = jsonObject.getString(KeyList.GETUSERLIST);
+                getUserList(conn, room);
                 break;
-            case MethodName.SETUSERCLINTID_ID:
+            case KeyList.SETUSERCLINTID_ID:
+                conn.Uname = jsonObject.getString(KeyList.SETUSERNICKNAME);
+                // TODO ENJOIN ROOM
                 break;
-            case MethodName.SETUSERNICKNAME_ID:
+            case KeyList.SETUSERNICKNAME_ID:
+                // UN USE NOW SET FOR KEEP FIVE MUINITES UNDER LINE
+                conn.ClinteID = jsonObject.getString(KeyList.SETUSERCLINTID);
                 break;
-            case MethodName.NORMAL_MESSAGE_ID:
+            case KeyList.NORMAL_MESSAGE_ID:
+                room = jsonObject.getString(KeyList.MESSAGE_ROOM);
+                sendMessage(message, room);
                 break;
             default:
                 break;
