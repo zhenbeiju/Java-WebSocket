@@ -1,5 +1,6 @@
 package org.java_websocket.server;
 
+import java.awt.event.KeyListener;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -29,6 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.LogManager;
 
 import net.sf.json.JSONObject;
+import net.sf.json.util.JSONStringer;
 
 import org.java_websocket.SocketChannelIOHelper;
 import org.java_websocket.WebSocket;
@@ -41,6 +43,8 @@ import org.java_websocket.framing.CloseFrame;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.handshake.Handshakedata;
 import org.java_websocket.util.KeyList;
+
+import sun.security.util.KeyLength;
 
 /**
  * <tt>WebSocketServer</tt> is an abstract class that only takes care of the
@@ -607,6 +611,11 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
                 mRooms.get(RoomName).add(ws);
 
             }
+            JSONStringer stringer = new JSONStringer();
+            String str = stringer.object().key(KeyList.METHODNAME).value(KeyList.ENTERIN_ID).key(KeyList.MESSAGE_ROOM)
+                    .value(RoomName).key(KeyList.SETUSERNICKNAME).value(ws.Uname).endObject().toString();
+            sendMessage(str, RoomName);
+            ws.Rooms.add(RoomName);
             return true;
         } catch (Exception e) {
             // TODO: handle exception
@@ -622,6 +631,11 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
             if (mRooms.containsKey(RoomName)) {
                 mRooms.get(RoomName).remove(ws);
             }
+            JSONStringer stringer = new JSONStringer();
+            String str = stringer.object().key(KeyList.METHODNAME).value(KeyList.QUITOUT_ID).key(KeyList.MESSAGE_ROOM)
+                    .value(RoomName).key(KeyList.SETUSERNICKNAME).value(ws.Uname).endObject().toString();
+            sendMessage(str, RoomName);
+            ws.Rooms.add(RoomName);
             return true;
         } catch (Exception e) {
             // TODO: handle exception
@@ -686,6 +700,9 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
     @Override
     public void onWebsocketClosing(WebSocket conn, int code, String reason, boolean remote) {
         onClosing(conn, code, reason, remote);
+        for (String roomName : conn.Rooms) {
+            quitRoom(conn, roomName);
+        }
     }
 
     public void onCloseInitiated(WebSocket conn, int code, String reason) {
