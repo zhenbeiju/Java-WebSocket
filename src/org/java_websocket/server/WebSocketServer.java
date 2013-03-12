@@ -42,9 +42,8 @@ import org.java_websocket.drafts.Draft;
 import org.java_websocket.framing.CloseFrame;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.handshake.Handshakedata;
+import org.java_websocket.util.JsonChange;
 import org.java_websocket.util.KeyList;
-
-import sun.security.util.KeyLength;
 
 /**
  * <tt>WebSocketServer</tt> is an abstract class that only takes care of the
@@ -518,6 +517,7 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
                 break;
             case KeyList.SETUSERCLINTID_ID:
                 conn.Uname = jsonObject.getString(KeyList.SETUSERNICKNAME);
+                addConnection(conn);
                 // TODO ENJOIN ROOM
                 break;
             case KeyList.SETUSERNICKNAME_ID:
@@ -529,6 +529,7 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
                 sendMessage(message, room);
                 break;
             default:
+                conn.send("not support method");
                 break;
             }
 
@@ -549,7 +550,7 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
         } else {
             // TODO Add To a Temp List
             TempConnections.add(conn);
-            conn.send("sameName");
+            conn.send(JsonChange.getErrorStr(KeyList.ERROR_UNKNOW));
         }
     }
 
@@ -598,9 +599,14 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
             synchronized (connections) {
                 return this.connections.add(ws);
             }
+        } else {
+            ws.send(JsonChange.getErrorStr(KeyList.ERROR_SAMENICKNAME));
+            return true;
         }
-        return false;
+
     }
+    
+    
 
     public boolean enterIntoROOM(WebSocket ws, String RoomName) {
         try {
@@ -649,7 +655,7 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
         JSONStringer stringer = new JSONStringer();
         if (RoomName != null && RoomName.length() > 0) {
             HashSet<WebSocket> RoomClints = mRooms.get(RoomName);
-       
+
             try {
                 String str;
                 if (RoomClints != null && RoomClints.size() > 1) {
@@ -658,12 +664,12 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
                         sb.append(tws.Uname);
                         sb.append("|");
                     }
-                     str = stringer.object().key(KeyList.METHODNAME).value(KeyList.GETUSERLIST_ID)
+                    str = stringer.object().key(KeyList.METHODNAME).value(KeyList.GETUSERLIST_ID)
                             .key(KeyList.MESSAGE_ROOM).value(RoomName).key(KeyList.GETUSERLIST).value(sb.toString())
                             .endObject().toString();
 
                 } else {
-                     str = stringer.object().key(KeyList.METHODNAME).value(KeyList.GETUSERLIST_ID)
+                    str = stringer.object().key(KeyList.METHODNAME).value(KeyList.GETUSERLIST_ID)
                             .key(KeyList.MESSAGE_ROOM).value(RoomName).key(KeyList.GETUSERLIST)
                             .value("None user In this Room").endObject().toString();
                 }
@@ -678,9 +684,8 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
                 sb.append(tws.Uname);
                 sb.append("|");
             }
-            ws.send( stringer.object().key(KeyList.METHODNAME).value(KeyList.GETUSERLIST_ID)
-                    .key(KeyList.MESSAGE_ROOM).value(RoomName).key(KeyList.GETUSERLIST).value(sb.toString())
-                    .endObject().toString());
+            ws.send(stringer.object().key(KeyList.METHODNAME).value(KeyList.GETUSERLIST_ID).key(KeyList.MESSAGE_ROOM)
+                    .value(RoomName).key(KeyList.GETUSERLIST).value(sb.toString()).endObject().toString());
         }
 
     }
