@@ -12,12 +12,14 @@ import net.sf.json.util.JSONStringer;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
+import org.java_websocket.util.JsonChange;
 import org.java_websocket.util.KeyList;
 
 public class WebSocketManager {
     private WebSocketClient myWebSocket;
     private String myNickName;
     private HashMap<String, IRoomInterface> mRooms = new HashMap<String, IRoomInterface>();
+    private HashMap<String, IRoomInterface> tempRooms = new HashMap<String, IRoomInterface>();
     public static WebSocketManager mSocketManager = new WebSocketManager();
     private boolean mConnectStatus = false;
 
@@ -73,12 +75,14 @@ public class WebSocketManager {
     }
 
     public void JoinRoom(IRoomInterface mInterface) {
-        mRooms.put(mInterface.RoomName, mInterface);
+        tempRooms.put(mInterface.RoomName, mInterface);
+        myWebSocket.sendMessage(JsonChange.enterInRoom(mInterface.RoomName));
     }
 
     public void QuitRoom(IRoomInterface mInterface) {
         // TODO send msg to server to quit this room
         mRooms.remove(mInterface.RoomName);
+        myWebSocket.sendMessage(JsonChange.quitOutRoom(mInterface.RoomName));
     }
 
     public void parseMessage(String msg) {
@@ -92,12 +96,12 @@ public class WebSocketManager {
             nickName = jsonObject.getString(KeyList.SETUSERNICKNAME);
             if (nickName.equals(myNickName)) {
                 // TODO reciver sb.self has enter in this room
-                // if (tempRooms.containsKey(room)) {
-                // mRooms.put(room, tempRooms.get(room));
-                // tempRooms.remove(room);
-                // } else {
-                // LogManager.e(" error room name:" + room);
-                // }
+                if(tempRooms.containsKey(room)){
+                    mRooms.put(room, tempRooms.get(room));
+                    tempRooms.remove(room);
+                    mRooms.get(room).onSysMessage("you has join this room . you can speak now!");
+                }
+          
             } else {
                 if (mRooms.containsKey(room)) {
                     mRooms.get(room).onSysMessage(nickName + "");
@@ -142,7 +146,6 @@ public class WebSocketManager {
         case KeyList.SYSTEM_MESSAGE_ID:
             String sysmsg = jsonObject.getString(KeyList.SYSTEM_MESSAGE);
             if (mRooms.containsKey(room)) {
-
                 mRooms.get(room).onSysMessage(sysmsg);
             } else {
                 for (IRoomInterface mInterface : mRooms.values()) {
@@ -156,6 +159,7 @@ public class WebSocketManager {
         case KeyList.ERROR_ID:
             int errorcode = jsonObject.getInt(KeyList.ERROR);
             switch (errorcode) {
+            // TODO add error handler
             case KeyList.ERROR_SAMENICKNAME:
 
                 break;

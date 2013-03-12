@@ -61,7 +61,6 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
      */
     private final Collection<WebSocket> connections;
 
-    private final Collection<WebSocket> TempConnections = new ArrayList<WebSocket>();
 
     /**
      * The port number that this WebSocket server should listen on. Default is
@@ -518,7 +517,6 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
             case KeyList.SETUSERCLINTID_ID:
                 conn.Uname = jsonObject.getString(KeyList.SETUSERNICKNAME);
                 addConnection(conn);
-                // TODO ENJOIN ROOM
                 break;
             case KeyList.SETUSERNICKNAME_ID:
                 // UN USE NOW, SET FOR KEEP FIVE MUINITES UNDER LINE
@@ -548,8 +546,6 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
         if (addConnection(conn)) {
             onOpen(conn, (ClientHandshake) handshake);
         } else {
-            // TODO Add To a Temp List
-            TempConnections.add(conn);
             conn.send(JsonChange.getErrorStr(KeyList.ERROR_UNKNOW));
         }
     }
@@ -561,10 +557,10 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
             if (removeConnection(conn)) {
                 onClose(conn, code, reason, remote);
             }
-            for (String roomname : conn.Rooms) {
-                mRooms.get(roomname).remove(conn);
-                sendMessage(conn.Uname.concat("hase left this room"), roomname);
-            }
+                for (String roomname : conn.Rooms) {
+                    mRooms.get(roomname).remove(conn);
+                    sendMessage(conn.Uname.concat("hase left this room"), roomname);
+                }
 
         } finally {
             try {
@@ -617,10 +613,8 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
                 mRooms.get(RoomName).add(ws);
 
             }
-            JSONStringer stringer = new JSONStringer();
-            String str = stringer.object().key(KeyList.METHODNAME).value(KeyList.ENTERIN_ID).key(KeyList.MESSAGE_ROOM)
-                    .value(RoomName).key(KeyList.SETUSERNICKNAME).value(ws.Uname).endObject().toString();
-            sendMessage(str, RoomName);
+            
+            sendMessage(JsonChange.enterInRoom(RoomName, ws.Uname), RoomName);
             ws.Rooms.add(RoomName);
             return true;
         } catch (Exception e) {
