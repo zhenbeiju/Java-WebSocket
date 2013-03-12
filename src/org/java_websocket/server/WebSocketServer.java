@@ -521,7 +521,7 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
                 // TODO ENJOIN ROOM
                 break;
             case KeyList.SETUSERNICKNAME_ID:
-                // UN USE NOW SET FOR KEEP FIVE MUINITES UNDER LINE
+                // UN USE NOW, SET FOR KEEP FIVE MUINITES UNDER LINE
                 conn.ClinteID = jsonObject.getString(KeyList.SETUSERCLINTID);
                 break;
             case KeyList.NORMAL_MESSAGE_ID:
@@ -635,7 +635,7 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
             String str = stringer.object().key(KeyList.METHODNAME).value(KeyList.QUITOUT_ID).key(KeyList.MESSAGE_ROOM)
                     .value(RoomName).key(KeyList.SETUSERNICKNAME).value(ws.Uname).endObject().toString();
             sendMessage(str, RoomName);
-            ws.Rooms.add(RoomName);
+            ws.Rooms.remove(RoomName);
             return true;
         } catch (Exception e) {
             // TODO: handle exception
@@ -646,20 +646,28 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
 
     public void getUserList(WebSocket ws, String RoomName) {
         StringBuffer sb = new StringBuffer();
+        JSONStringer stringer = new JSONStringer();
         if (RoomName != null && RoomName.length() > 0) {
             HashSet<WebSocket> RoomClints = mRooms.get(RoomName);
+       
             try {
+                String str;
                 if (RoomClints != null && RoomClints.size() > 1) {
 
                     for (WebSocket tws : RoomClints) {
                         sb.append(tws.Uname);
                         sb.append("|");
                     }
-                    ws.send(sb.toString());
-                    return;
+                     str = stringer.object().key(KeyList.METHODNAME).value(KeyList.GETUSERLIST_ID)
+                            .key(KeyList.MESSAGE_ROOM).value(RoomName).key(KeyList.GETUSERLIST).value(sb.toString())
+                            .endObject().toString();
+
                 } else {
-                    ws.send("None User In This Room");
+                     str = stringer.object().key(KeyList.METHODNAME).value(KeyList.GETUSERLIST_ID)
+                            .key(KeyList.MESSAGE_ROOM).value(RoomName).key(KeyList.GETUSERLIST)
+                            .value("None user In this Room").endObject().toString();
                 }
+                ws.send(str);
             } catch (Exception e) {
                 // TODO: handle exception
                 ws.send("get userlist error");
@@ -670,7 +678,9 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
                 sb.append(tws.Uname);
                 sb.append("|");
             }
-            ws.send(sb.toString());
+            ws.send( stringer.object().key(KeyList.METHODNAME).value(KeyList.GETUSERLIST_ID)
+                    .key(KeyList.MESSAGE_ROOM).value(RoomName).key(KeyList.GETUSERLIST).value(sb.toString())
+                    .endObject().toString());
         }
 
     }
