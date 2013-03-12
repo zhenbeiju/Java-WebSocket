@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-import net.sf.json.util.JSONStringer;
 
 import org.java_websocket.SocketChannelIOHelper;
 import org.java_websocket.WebSocket;
@@ -191,73 +190,10 @@ public abstract class WebSocketClient extends WebSocketAdapter implements Runnab
         }
     }
 
-    public void joinRoom(String RoomName) {
-        if (conn != null) {
-            JSONStringer stringer = new JSONStringer();
-            String str = stringer.object().key(KeyList.METHODNAME).value(KeyList.ENTERIN_ID)
-                    .key(KeyList.ENTERIN).value(RoomName).endObject().toString();
-            conn.send(str);
-        }
-
-    }
-
-    public void quitRoom(String RoomName) {
-        if (conn != null) {
-            JSONStringer stringer = new JSONStringer();
-            String str = stringer.object().key(KeyList.METHODNAME).value(KeyList.QUITOUT_ID)
-                    .key(KeyList.QUITOUT).value(RoomName).endObject().toString();
-            conn.send(str);
-        }
-
-    }
-
-    public void getUserList(String RoomName) {
-        if (conn != null) {
-            JSONStringer stringer = new JSONStringer();
-            String str = stringer.object().key(KeyList.METHODNAME).value(KeyList.GETUSERLIST_ID)
-                    .key(KeyList.GETUSERLIST).value(RoomName).endObject().toString();
-            conn.send(str);
-        }
-
-    }
-
-    public void setUserName(String NickName) {
-        if (conn != null) {
-            JSONStringer stringer = new JSONStringer();
-            String str = stringer.object().key(KeyList.METHODNAME).value(KeyList.SETUSERNICKNAME_ID)
-                    .key(KeyList.SETUSERNICKNAME).value(NickName).endObject().toString();
-            conn.send(str);
-        }
-
-    }
-
-    public void setClintID(String clintId) {
-        if (conn != null) {
-            JSONStringer stringer = new JSONStringer();
-            String str = stringer.object().key(KeyList.METHODNAME).value(KeyList.SETUSERCLINTID_ID)
-                    .key(KeyList.SETUSERCLINTID).value(clintId).endObject().toString();
-            conn.send(str);
-        }
-
-    }
-
-    public void sendMessage(String Room, String msg) {
-        if (conn != null) {
-            JSONStringer stringer = new JSONStringer();
-            String str = stringer.object().key(KeyList.METHODNAME).value(KeyList.NORMAL_MESSAGE_ID)
-                    .key(KeyList.NORMAL_MESSAGE).value(msg).key(KeyList.MESSAGE_ROOM).value(Room).endObject()
-                    .toString();
-            conn.send(str);
-        }
-
-    }
 
     public void sendMessage(String msg) {
         if (conn != null) {
-            JSONStringer stringer = new JSONStringer();
-            String str = stringer.object().key(KeyList.METHODNAME).value(KeyList.NORMAL_MESSAGE_ID)
-                    .key(KeyList.NORMAL_MESSAGE).value(msg).endObject().toString();
-            conn.send(str);
+            conn.send(msg);
         }
     }
 

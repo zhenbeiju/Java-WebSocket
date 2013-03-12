@@ -663,12 +663,15 @@ public class WebSocketImpl extends WebSocket {
         if (DEBUG)
             System.out.println("open using draft: " + draft.getClass().getSimpleName());
         readystate = READYSTATE.OPEN;
+        Uname = d.getFieldValue("name");
         try {
-            Uname = d.getFieldValue("name");
+          
             wsl.onWebsocketOpen(this, d);
+        
         } catch (RuntimeException e) {
             wsl.onWebsocketError(this, e);
         }
+
     }
 
     @Override
