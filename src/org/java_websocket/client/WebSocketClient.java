@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-
 import org.java_websocket.SocketChannelIOHelper;
 import org.java_websocket.WebSocket;
 import org.java_websocket.WebSocket.READYSTATE;
@@ -186,11 +185,10 @@ public abstract class WebSocketClient extends WebSocketAdapter implements Runnab
      */
     public void send(String text) throws NotYetConnectedException {
         if (conn != null) {
-            
+
             conn.send(text);
         }
     }
-
 
     public void sendMessage(String msg) {
         if (conn != null) {
@@ -248,8 +246,11 @@ public abstract class WebSocketClient extends WebSocketAdapter implements Runnab
                    * IOException | SecurityException |
                    * UnresolvedAddressException
                    */Exception e) {//
-            onWebsocketError(conn, e);
-            conn.closeConnection(CloseFrame.NEVER_CONNECTED, e.getMessage());
+            if (conn != null && e != null) {
+                onWebsocketError(conn, e);
+                conn.closeConnection(CloseFrame.NEVER_CONNECTED, "");
+            }
+
             return;
         }
 

@@ -60,7 +60,7 @@ public class JsonChange {
         return str;
     }
 
-    public static String quitOutRoom(String room) {
+    public static String quitOutRoom(String room,String nickName) {
         JSONStringer stringer = new JSONStringer();
         String st = "";
         try {

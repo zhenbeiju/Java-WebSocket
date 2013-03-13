@@ -499,7 +499,6 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
     public final void onWebsocketMessage(WebSocket conn, String message) {
         System.err.print(message);
         try {
-
             JSONObject jsonObject = new JSONObject(message);
             int methodID = jsonObject.getInt(KeyList.METHODNAME);
             if (methodID > 0) {
@@ -507,7 +506,7 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
                 switch (methodID) {
 
                 case KeyList.ENTERIN_ID:
-                    room = jsonObject.getString(KeyList.ENTERIN);
+                    room = jsonObject.getString(KeyList.MESSAGE_ROOM);
                     enterIntoROOM(conn, room);
                     break;
                 case KeyList.QUITOUT_ID:
@@ -528,7 +527,8 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
                     break;
                 case KeyList.NORMAL_MESSAGE_ID:
                     room = jsonObject.getString(KeyList.MESSAGE_ROOM);
-                    sendMessage(message, room);
+                    jsonObject.put(KeyList.SETUSERNICKNAME, conn.Uname);
+                    sendMessage(jsonObject.toString(), room);
                     break;
                 default:
                     conn.send("not support method");
@@ -642,10 +642,7 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
             if (mRooms.containsKey(RoomName)) {
                 mRooms.get(RoomName).remove(ws);
             }
-            JSONStringer stringer = new JSONStringer();
-            String str = stringer.object().key(KeyList.METHODNAME).value(KeyList.QUITOUT_ID).key(KeyList.MESSAGE_ROOM)
-                    .value(RoomName).key(KeyList.SETUSERNICKNAME).value(ws.Uname).endObject().toString();
-            sendMessage(str, RoomName);
+            sendMessage(JsonChange.quitOutRoom(RoomName, ws.Uname), RoomName);
             ws.Rooms.remove(RoomName);
             return true;
         } catch (Exception e) {
@@ -824,6 +821,7 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
     }
 
     public void sendMessage(String msg, String room) {
+        System.err.print(msg + "  " + room);
         HashSet<WebSocket> roomClint = mRooms.get(room);
         synchronized (roomClint) {
             for (WebSocket conn : roomClint) {
