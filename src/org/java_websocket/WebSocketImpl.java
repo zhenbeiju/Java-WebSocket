@@ -380,6 +380,7 @@ public class WebSocketImpl extends WebSocket {
                     try {
                         wsl.onWebsocketMessage(this, Charsetfunctions.stringUtf8(f.getPayloadData()));
                     } catch (RuntimeException e) {
+                        e.printStackTrace() ;
                         wsl.onWebsocketError(this, e);
                     }
                 } else if (curop == Opcode.BINARY) {
@@ -559,6 +560,7 @@ public class WebSocketImpl extends WebSocket {
     public void send(String text) throws WebsocketNotConnectedException {
         if (text == null)
             throw new IllegalArgumentException("Cannot send 'null' data to a WebSocketImpl.");
+        System.out.println(text);
         send(draft.createFrames(text, role == Role.CLIENT));
     }
 
@@ -669,6 +671,7 @@ public class WebSocketImpl extends WebSocket {
             wsl.onWebsocketOpen(this, d);
         
         } catch (RuntimeException e) {
+            e.printStackTrace();
             wsl.onWebsocketError(this, e);
         }
 

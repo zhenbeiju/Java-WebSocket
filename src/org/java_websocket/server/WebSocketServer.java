@@ -9,6 +9,7 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.nio.channels.CancelledKeyException;
+import java.nio.channels.NotYetConnectedException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -29,9 +30,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.LogManager;
 
-import net.sf.json.JSONObject;
-import net.sf.json.util.JSONStringer;
-
 import org.java_websocket.SocketChannelIOHelper;
 import org.java_websocket.WebSocket;
 import org.java_websocket.WebSocketAdapter;
@@ -44,6 +42,9 @@ import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.handshake.Handshakedata;
 import org.java_websocket.util.JsonChange;
 import org.java_websocket.util.KeyList;
+import org.json.me.JSONException;
+import org.json.me.JSONObject;
+import org.json.me.JSONStringer;
 
 /**
  * <tt>WebSocketServer</tt> is an abstract class that only takes care of the
@@ -60,7 +61,7 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
      * handshake is complete and socket can be written to, or read from.
      */
     private final Collection<WebSocket> connections;
-
+    private final Collection<WebSocket> realConnections = new ArrayList<WebSocket>();
 
     /**
      * The port number that this WebSocket server should listen on. Default is
@@ -496,44 +497,52 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
 
     @Override
     public final void onWebsocketMessage(WebSocket conn, String message) {
-        JSONObject jsonObject = JSONObject.fromObject(message);
-        int methodID = jsonObject.getInt(KeyList.METHODNAME);
-        if (methodID > 0) {
-            String room;
-            switch (methodID) {
+        System.err.print(message);
+        try {
 
-            case KeyList.ENTERIN_ID:
-                room = jsonObject.getString(KeyList.ENTERIN);
-                enterIntoROOM(conn, room);
-                break;
-            case KeyList.QUITOUT_ID:
-                room = jsonObject.getString(KeyList.QUITOUT);
-                quitRoom(conn, room);
-                break;
-            case KeyList.GETUSERLIST_ID:
-                room = jsonObject.getString(KeyList.GETUSERLIST);
-                getUserList(conn, room);
-                break;
-            case KeyList.SETUSERCLINTID_ID:
-                conn.Uname = jsonObject.getString(KeyList.SETUSERNICKNAME);
-                addConnection(conn);
-                break;
-            case KeyList.SETUSERNICKNAME_ID:
-                // UN USE NOW, SET FOR KEEP FIVE MUINITES UNDER LINE
-                conn.ClinteID = jsonObject.getString(KeyList.SETUSERCLINTID);
-                break;
-            case KeyList.NORMAL_MESSAGE_ID:
-                room = jsonObject.getString(KeyList.MESSAGE_ROOM);
-                sendMessage(message, room);
-                break;
-            default:
-                conn.send("not support method");
-                break;
+            JSONObject jsonObject = new JSONObject(message);
+            int methodID = jsonObject.getInt(KeyList.METHODNAME);
+            if (methodID > 0) {
+                String room;
+                switch (methodID) {
+
+                case KeyList.ENTERIN_ID:
+                    room = jsonObject.getString(KeyList.ENTERIN);
+                    enterIntoROOM(conn, room);
+                    break;
+                case KeyList.QUITOUT_ID:
+                    room = jsonObject.getString(KeyList.QUITOUT);
+                    quitRoom(conn, room);
+                    break;
+                case KeyList.GETUSERLIST_ID:
+                    room = jsonObject.getString(KeyList.GETUSERLIST);
+                    getUserList(conn, room);
+                    break;
+                case KeyList.SETUSERCLINTID_ID:
+                    conn.Uname = jsonObject.getString(KeyList.SETUSERNICKNAME);
+                    addConnection(conn);
+                    break;
+                case KeyList.SETUSERNICKNAME_ID:
+                    // UN USE NOW, SET FOR KEEP FIVE MUINITES UNDER LINE
+                    conn.ClinteID = jsonObject.getString(KeyList.SETUSERCLINTID);
+                    break;
+                case KeyList.NORMAL_MESSAGE_ID:
+                    room = jsonObject.getString(KeyList.MESSAGE_ROOM);
+                    sendMessage(message, room);
+                    break;
+                default:
+                    conn.send("not support method");
+                    break;
+                }
+
+                //
             }
-
-            onMessage(conn, message);
+        } catch (Exception e) {
+            // TODO: handle exception
+            e.printStackTrace();
         }
-
+        sendMessage(message);
+        // onMessage(conn, message);
     }
 
     @Override
@@ -557,10 +566,10 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
             if (removeConnection(conn)) {
                 onClose(conn, code, reason, remote);
             }
-                for (String roomname : conn.Rooms) {
-                    mRooms.get(roomname).remove(conn);
-                    sendMessage(conn.Uname.concat("hase left this room"), roomname);
-                }
+            for (String roomname : conn.Rooms) {
+                mRooms.get(roomname).remove(conn);
+                sendMessage(conn.Uname.concat("hase left this room"), roomname);
+            }
 
         } finally {
             try {
@@ -590,19 +599,21 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
 
     /** @see #removeConnection(WebSocket) */
     protected boolean addConnection(WebSocket ws) {
+        synchronized (connections) {
+            this.connections.add(ws);
+        }
         if (!NickNames.contains(ws.Uname)) {
             NickNames.add(ws.Uname);
-            synchronized (connections) {
-                return this.connections.add(ws);
+            synchronized (realConnections) {
+                return this.realConnections.add(ws);
             }
         } else {
             ws.send(JsonChange.getErrorStr(KeyList.ERROR_SAMENICKNAME));
+
             return true;
         }
 
     }
-    
-    
 
     public boolean enterIntoROOM(WebSocket ws, String RoomName) {
         try {
@@ -613,7 +624,7 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
                 mRooms.get(RoomName).add(ws);
 
             }
-            
+
             sendMessage(JsonChange.enterInRoom(RoomName, ws.Uname), RoomName);
             ws.Rooms.add(RoomName);
             return true;
@@ -678,8 +689,17 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
                 sb.append(tws.Uname);
                 sb.append("|");
             }
-            ws.send(stringer.object().key(KeyList.METHODNAME).value(KeyList.GETUSERLIST_ID).key(KeyList.MESSAGE_ROOM)
-                    .value(RoomName).key(KeyList.GETUSERLIST).value(sb.toString()).endObject().toString());
+            try {
+                ws.send(stringer.object().key(KeyList.METHODNAME).value(KeyList.GETUSERLIST_ID)
+                        .key(KeyList.MESSAGE_ROOM).value(RoomName).key(KeyList.GETUSERLIST).value(sb.toString())
+                        .endObject().toString());
+            } catch (NotYetConnectedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (JSONException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
 
     }
@@ -793,8 +813,10 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
     };
 
     public void sendMessage(String msg) {
+
         synchronized (connections) {
             for (WebSocket conn : connections) {
+                System.out.println(msg);
                 conn.send(msg);
             }
         }

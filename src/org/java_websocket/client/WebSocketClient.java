@@ -186,6 +186,7 @@ public abstract class WebSocketClient extends WebSocketAdapter implements Runnab
      */
     public void send(String text) throws NotYetConnectedException {
         if (conn != null) {
+            
             conn.send(text);
         }
     }
