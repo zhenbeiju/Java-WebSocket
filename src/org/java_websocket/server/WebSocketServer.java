@@ -1,6 +1,5 @@
 package org.java_websocket.server;
 
-import java.awt.event.KeyListener;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -28,7 +27,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.LogManager;
 
 import org.java_websocket.SocketChannelIOHelper;
 import org.java_websocket.WebSocket;
@@ -528,7 +526,8 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
                 case KeyList.NORMAL_MESSAGE_ID:
                     room = jsonObject.getString(KeyList.MESSAGE_ROOM);
                     jsonObject.put(KeyList.SETUSERNICKNAME, conn.Uname);
-                    sendMessage(jsonObject.toString(), room);
+                    String msg = jsonObject.toString();
+                    sendMessage(msg, room);
                     break;
                 default:
                     conn.send("not support method");
@@ -541,7 +540,7 @@ public abstract class WebSocketServer extends WebSocketAdapter implements Runnab
             // TODO: handle exception
             e.printStackTrace();
         }
-        sendMessage(message);
+//        sendMessage(message);
         // onMessage(conn, message);
     }
 
