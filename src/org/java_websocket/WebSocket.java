@@ -1,12 +1,9 @@
 package org.java_websocket;
 
-import java.awt.List;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.NotYetConnectedException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 
 import org.java_websocket.drafts.Draft;
 import org.java_websocket.framing.Framedata;
@@ -17,7 +14,7 @@ public abstract class WebSocket {
     }
 
     public enum READYSTATE {
-        NOT_YET_CONNECTED, CONNECTING, OPEN, CLOSING, CLOSED;
+        NOT_YET_CONNECTED, CONNECTING, OPEN, CLOSING, CLOSED, ERROR_NAME, ERROR_CONNECTING,
     }
 
     /**
@@ -38,7 +35,7 @@ public abstract class WebSocket {
      */
     public String ClinteID;
     /**
-     * 用来存储用户加入的房间 
+     * 用来存储用户加入的房间
      */
     public ArrayList<String> Rooms = new ArrayList<String>();
 
